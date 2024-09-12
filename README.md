@@ -1,8 +1,8 @@
-# Get-List-New-Datasets
+# Get-List-New-Datasets-GPs
 
-Python code desigend to be run in ArcGIS OnLine Notebook
+Python code designed to be run in ArcGIS OnLine Notebook
 
-This allows users to create a list of datasets from PHE FingerTips (Open Source Data) which require updating.
+This allows users to create a list of GP datasets from PHE FingerTips (Open Source Data) which require updating.
 
 It carries out the following actions in the following order  
 - Connect to AGOL  

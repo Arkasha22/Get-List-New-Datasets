@@ -1,23 +1,8 @@
-#!/usr/bin/env python
-# coding: utf-8
+#Script created by Donald Maruta - 21 Feb 24
 
-# ## Welcome to your notebook.
-# 
-
-# #### Run this cell to connect to your GIS and get started:
-
-# In[1]:
-
-
-#Script created by Donald Maruta - NCL ICB Senior Geospatial Manager - 21 Feb 24
+#Log Into ArcGIS Online
 from arcgis.gis import GIS
 gis = GIS("home")
-
-
-# #### Now you are ready to start!
-
-# In[2]:
-
 
 #Import Modules
 import requests, csv, os, time, shutil, arcpy, glob
@@ -26,6 +11,8 @@ from arcgis.gis import GIS
 from datetime import date
 from pathlib import Path
 from arcgis.features import FeatureLayerCollection
+
+#Create Variables
 todayDate = datetime.datetime.now().strftime("%y%m%d%y%H%M")
 arcpy.env.workspace = "/arcgis/home/CancerDashboard/FingerTips_Ingest_" + todayDate + ".gdb"
 filePath = "/arcgis/home/CancerDashboard"
@@ -34,75 +21,40 @@ fileGDB = "FingerTips_Ingest_" + todayDate + ".gdb"
 arcpy.management.CreateFileGDB(filePath, fileGDB)
 fldrPath = "/arcgis/home/CancerDashboard/"
 
-
-# In[3]:
-
-
 #Import Metadata and OldMetadata CSV files
 metadata = "/arcgis/home/CancerDashboard/Metadata.csv"
 metadata_df = pd.read_csv(metadata)
-
 oldmetadata = "/arcgis/home/CancerDashboard/OldMetadata.csv"
 oldmetadata_df = pd.read_csv(oldmetadata)
 
-
-# In[4]:
-
-
+#Merge Both Metadata DataFrames
 combimetadata = pd.merge(oldmetadata_df, metadata_df, on="IndicatorId")
 combimetadata.columns = ["IndicatorId", "OldDate", "NewDate"]
-combimetadata
-
-
-# In[5]:
-
 
 #Import list of GPs
 GPlist = "/arcgis/home/CancerDashboard/CancerGP.csv"
 GPlistDF = pd.read_csv(GPlist)
 GPlistDF.columns = ["IndicatorId"]
 
-
-# In[6]:
-
-
+#Merge Metadata and GP list Data Frames
 GPmetadata = pd.merge(combimetadata, GPlistDF, on="IndicatorId")
-GPmetadata
 
-
-# In[7]:
-
-
+#Create Data Frame of NCL ICB GPs
 NCL_GPs = "/arcgis/home/CancerDashboard/NCLICB_GPs.csv"
 NCL_GPs_df = pd.read_csv(NCL_GPs)
 NCL_GPs_df.columns = ["Area Code", "Latitude", "Longitude", "PostCode", "MSOA21CD", "Borough", "PCN_Code", "PCN_Name"]
 
-
-# In[8]:
-
-
-NCL_GPs_df
-
-
-# In[9]:
-
-
 #Number of iterations needed
 length = len(GPmetadata)
-#length = 1
 
-
-# In[10]:
-
-
-#Creation of the loop
+#Creation of loop to process FingerTips Data
 for i in range(length):
         
     #Check to see if data requires updating
     oldDate = GPmetadata.loc[i, 'OldDate']
     newDate = GPmetadata.loc[i, 'NewDate']
     if oldDate == newDate:
-        continue
+        continue # Goes to next value of i
     
     # Maximum number of download attempts
     max_attempts = 10
@@ -110,16 +62,8 @@ for i in range(length):
     # Sleep time between retry attempts (in seconds)
     retry_delay = 30
     
-    #Input name of Fingertips below
+    #Input name of Fingertips
     fingerTips = str(GPmetadata.loc[i, 'IndicatorId'])
-    csvfile = "GP"+fingerTips
-    
-    # Maximum number of download attempts
-    max_attempts = 10
-    #max_attempts = 1
-
-    # Sleep time between retry attempts (in seconds)
-    retry_delay = 30
 
     for attempt in range(max_attempts):
 
@@ -127,8 +71,8 @@ for i in range(length):
         url = "https://fingertips.phe.org.uk/api/all_data/csv/for_one_indicator?indicator_id=" + fingerTips
         print(url)
         response_API = requests.get(url, timeout=3600)
-        # Check if the file is correct (you can replace this condition)
-        if response_API.status_code == 200:
+        # Check if the file is correct
+        if response_API.status_code == 200: #Response code 200 is Request Succeeded
             data = response_API.text
             print("Data downloaded")
 
@@ -141,7 +85,8 @@ for i in range(length):
             
             #Import into Dataframe
             fileDF = pd.read_csv(outputcsv, low_memory=False)
-            #print(fileDF)
+            
+            #Merge Data Frames together
             tempDF = pd.merge(fileDF, NCL_GPs_df, on="Area Code", how="inner")
             tempDF.to_csv(outputcsv)
             break
@@ -173,10 +118,6 @@ for i in range(length):
     item_collection.manager.update_definition(update_dict)
     item.content_status="authoritative"    
 
-
-# In[11]:
-
-
 #Code to delete unnecessary files
 arcpy.env.workspace = '/arcgis/home/CancerDashboard'
 
@@ -205,10 +146,3 @@ for file_path in all_files:
         print(f"Deleted {file_name}")
 
 print("All files except the specified ones have been deleted.")
-
-
-# In[12]:
-
-
-print("Alles gemacht!")
-

@@ -1,10 +1,10 @@
 #Script created by Donald Maruta - 21 Feb 24
 
-#Log Into ArcGIS Online
+#Connect to AGOL
 from arcgis.gis import GIS
 gis = GIS("home")
 
-#Import Modules
+#Import Required Modules
 import requests, csv, os, time, shutil, arcpy, glob
 import pandas as pd
 from arcgis.gis import GIS

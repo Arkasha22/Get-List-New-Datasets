@@ -7,10 +7,14 @@ This allows users to create a list of datasets from PHE FingerTips (Open Source 
 It carries out the following actions in the following order  
 - Connect to AGOL  
 - Import Required Modules
-- Copy current metadata file to backup metadata file  
-- Variables Required to Import Updated Metadata from FingerTips  
-- Open the URL Request  
-- Write to the CSV file  
-- Create Pandas dataframe  
-- Rejig dataframe columns and rename  
-- Write the resulting DataFrame to a new CSV file  
+- Create Variables  
+- Import Metadata and OldMetadata CSV files  
+- Merge Both Metadata DataFrames  
+- Import list of GPs  
+- Merge Metadata and GP list Data Frames
+- Create Data Frame of NCL ICB GPs
+- Number of iterations needed
+- Creation of loop to process FingerTips Data
+- Initial creation of the service - GP Services
+- Overwrite the existing service - All Services
+- Code to delete unnecessary files
